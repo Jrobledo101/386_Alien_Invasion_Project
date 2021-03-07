@@ -35,7 +35,6 @@ class Game:
         self.finished = False
         self.title = True
         self.scorescreendisplay = False
-        self.highscorelist = []
 
     def textset(self, text, posx, posy):
         self.texttodisplay = self.font.render(text, True, (255,255,255), (0,0,0))
@@ -46,14 +45,15 @@ class Game:
         while self.title:
             self.screen.fill(self.settings.bg_color)
             self.sound.pause_bg()
-            self.screen.blit(pg.image.load('images/alien00.png'),(500,150))
-            self.screen.blit(pg.image.load('images/alien10.png'), (500, 250))
-            self.screen.blit(pg.image.load('images/alien20.png'), (500, 350))
-            self.textset('100', 600, 370)
-            self.textset('300', 600, 270)
-            self.textset('500', 600, 170)
-            self.textset('Press SPACE to begin', 430, 450)
-            self.textset('Press \'H\' to view high scores', 380, 550)
+            self.screen.blit(pg.image.load('images/alien00.png'),(500,170))
+            self.screen.blit(pg.image.load('images/alien10.png'), (500, 270))
+            self.screen.blit(pg.image.load('images/alien20.png'), (500, 370))
+            self.textset('Space Invaders', 450, 50)
+            self.textset('100', 600, 380)
+            self.textset('300', 600, 280)
+            self.textset('500', 600, 180)
+            self.textset('Press SPACE to begin', 430, 470)
+            self.textset('Press \'H\' to view high scores', 380, 570)
             pg.display.flip()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -72,8 +72,13 @@ class Game:
         while self.scorescreendisplay:
             self.screen.fill(self.settings.bg_color)
             self.textset('High Scores:', 500, 50)
-            self.textset('Press esc to exit', 450, 700)
-            self.textset(f'{self.hs} ', 600, 100)
+            self.textset('Press esc to exit', 470, 750)
+            with open('HighScores.txt', 'r') as f:
+                lines = f.readlines()
+            numbers = [int(e.strip()) for e in lines]
+            numbers.sort(reverse=True)
+            for i in range(8):
+                self.textset(f'{numbers[i]}', 580, 100+i*80)
             pg.display.flip()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -84,16 +89,6 @@ class Game:
                         self.scorescreendisplay = False
                         self.title = True
                         self.title_screen()
-
-    def scores(self):
-        self.dir = path.dirname(__file__)
-        with open(path.join(self.dir, HS_FILE), 'r') as f:
-            try:
-                self.stats.high_score = int(f.read())
-                self.hs = self.stats.high_score
-            except:
-                self.hs = -1000000
-        print(f'High score was {self.hs}')
 
     def restart(self):
         self.play_button = Button(settings=self.settings, screen=self.screen, msg="Play")
@@ -111,14 +106,11 @@ class Game:
 
 
     def printscores(self):
-        f = open('HighScores.txt', 'r')
-
-        for line in f:
-            saved_score = line.strip()
-            self.highscorelist.append(saved_score)
-
-        for saved_score in self.highscorelist:
-            print(saved_score)
+        with open('HighScores.txt', 'r') as f:
+            lines = f.readlines()
+        numbers = [int(e.strip()) for e in lines]
+        numbers.sort()
+        print(numbers)
 
     def play(self):
         while not self.finished:
@@ -146,23 +138,25 @@ class Game:
             time.sleep(0.5)
             self.ship.timer = Ship.timer
         else:
+            print(f'High score was {self.stats.high_score}')
+            self.savescore()
+            self.printscores()
             self.stats.game_active = False
             self.sound.pause_bg()
             self.hs = self.stats.high_score
             self.restart()
+            self.title = True
+            self.title_screen()
+            pg.display.flip()
 
     def savescore(self):
-        f = open("HighScores.txt", "w")
+        f = open("HighScores.txt", "a")
         f.write(str(self.stats.high_score))
         f.write("\n")
 
 def main():
     g = Game()
-    g.scores()
     g.title_screen()
-    print(f'High score was {g.stats.high_score}')
-    g.savescore()
-    g.printscores()
     # Vector.run_tests()
     # Quaternion.run_tests()
     # Matrix.run_tests()
