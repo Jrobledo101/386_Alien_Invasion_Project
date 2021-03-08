@@ -9,8 +9,9 @@ class Settings():
         self.screen_width = 1200
         self.screen_height = 800
         self.bg_color = (10, 10, 10)
+        self.rand = (random.randint(0,9))
 
-        self.ship_limit = 1
+        self.ship_limit = 2
         self.alien_bullet_width = 2
         self.alien_bullet_height = 30
         self.alien_bullet_color = 0, 255, 0
@@ -19,7 +20,7 @@ class Settings():
         self.ship_bullet_height = 50
         self.ship_bullet_width = 2
         self.ship_bullet_color = 255, 0, 0
-        self.ship_bullets_every = (random.randint(0,9))
+        self.ship_bullets_every = 1
 
         self.fleet_drop_speed = 10
         self.debounce = 0.0001

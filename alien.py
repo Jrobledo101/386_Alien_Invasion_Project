@@ -4,6 +4,7 @@ from timer import Timer
 from pygame.sprite import Group
 from bullet import BulletFromAlien
 from random import randint
+import random
 
 
 class Aliens:
@@ -75,7 +76,7 @@ class Aliens:
 
     def one_alien_shoots_if_time(self):
         now = pg.time.get_ticks()
-        if now > self.last_bullet_shot + self.settings.alien_bullets_every * 1000:
+        if now > self.last_bullet_shot + (random.randint(1,5)) * 1000:
             li = self.alien_group.sprites()
             length = len(li)
             shooter = li[randint(0, length - 1)]
@@ -128,7 +129,7 @@ class Aliens:
 
 class Alien(Sprite):   # INHERITS from SPRITE
     images = [[pg.image.load('images/alien' + str(number) + str(i) + '.png') for i in range(2)] for number in range(3)]
-    images_boom = [pg.image.load('images/explosion_' + str(i) + '.png') for i in range(9)]
+    images_boom = [pg.image.load('images/alien_boom' + str(i) + '.png') for i in range(4)]
 
     timers = []
     for i in range(3):
@@ -169,6 +170,7 @@ class Alien(Sprite):   # INHERITS from SPRITE
             self.timer_switched = True
             self.game.sb.check_high_score(self.game.stats.score)
             self.game.sb.prep_score()
+            self.game.akilled += 1
             #sound.self = Sound('sounds/boom.wav')
             #sound.self.play()
 

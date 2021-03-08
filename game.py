@@ -35,9 +35,12 @@ class Game:
         self.finished = False
         self.title = True
         self.scorescreendisplay = False
+        self.white = (255,255,255)
+        self.akilled = 0
+        self.music_check = False
 
-    def textset(self, text, posx, posy):
-        self.texttodisplay = self.font.render(text, True, (255,255,255), (0,0,0))
+    def textset(self, text, posx, posy, color):
+        self.texttodisplay = self.font.render(text, True, color, (0,0,0))
         self.screen.blit(self.texttodisplay, (posx, posy))
 
     def title_screen(self):
@@ -48,12 +51,13 @@ class Game:
             self.screen.blit(pg.image.load('images/alien00.png'),(500,170))
             self.screen.blit(pg.image.load('images/alien10.png'), (500, 270))
             self.screen.blit(pg.image.load('images/alien20.png'), (500, 370))
-            self.textset('Space Invaders', 450, 50)
-            self.textset('100', 600, 380)
-            self.textset('300', 600, 280)
-            self.textset('500', 600, 180)
-            self.textset('Press SPACE to begin', 430, 470)
-            self.textset('Press \'H\' to view high scores', 380, 570)
+            self.textset('SPACE', 550, 30, self.white)
+            self.textset('INVADERS', 525, 80, (10,200,100))
+            self.textset('100', 600, 380, self.white)
+            self.textset('300', 600, 280, self.white)
+            self.textset('500', 600, 180, self.white)
+            self.textset('Press SPACE to begin', 430, 470, self.white)
+            self.textset('Press \'H\' to view high scores', 380, 570, self.white)
             pg.display.flip()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -71,14 +75,14 @@ class Game:
     def score_screen(self):
         while self.scorescreendisplay:
             self.screen.fill(self.settings.bg_color)
-            self.textset('High Scores:', 500, 50)
-            self.textset('Press esc to exit', 470, 750)
+            self.textset('High Scores:', 500, 50, self.white)
+            self.textset('Press esc to exit', 470, 750, self.white)
             with open('HighScores.txt', 'r') as f:
                 lines = f.readlines()
             numbers = [int(e.strip()) for e in lines]
             numbers.sort(reverse=True)
             for i in range(8):
-                self.textset(f'{numbers[i]}', 580, 100+i*80)
+                self.textset(f'{numbers[i]}', 580, 100+i*80, self.white)
             pg.display.flip()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -91,8 +95,7 @@ class Game:
                         self.title_screen()
 
     def restart(self):
-        self.play_button = Button(settings=self.settings, screen=self.screen, msg="Play")
-        self.hs_button = Button(settings=self.settings, screen=self.screen, msg="High Scores")
+        self.play_button = Button(screen=self.screen, msg="Play")
         self.stats = GameStats(settings=self.settings)
         self.sb = Scoreboard(game=self, sound=self.sound)
         self.settings.init_dynamic_settings()
@@ -119,6 +122,9 @@ class Game:
                 self.ship.update()
                 self.aliens.update()
                 self.barriers.update()
+                if self.akilled > 20 and not self.music_check:
+                    self.music_check = True
+                    self.sound = Sound(bg_music="sounds/music_fast.wav")
 
             self.screen.fill(self.settings.bg_color)
             self.ship.draw()
@@ -137,6 +143,10 @@ class Game:
             self.ship.center_ship()
             time.sleep(0.5)
             self.ship.timer = Ship.timer
+            self.akilled = 0
+            self.music_check = False
+            self.sound = Sound(bg_music="sounds/music.wav")
+
         else:
             print(f'High score was {self.stats.high_score}')
             self.savescore()
